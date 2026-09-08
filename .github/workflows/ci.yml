@@ -1,4 +1,4 @@
-﻿name: CI
+name: CI
 
 on:
   push:
@@ -22,15 +22,14 @@ jobs:
           cache: "pip"
           cache-dependency-path: backend/requirements.txt
 
-      - name: Install test dependencies
+      - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install fastapi pydantic pydantic-settings pytest pytest-asyncio pytest-mock \
-            qdrant-client langgraph langchain-core groq openai httpx rank_bm25 \
-            redis prometheus-client python-multipart
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio pytest-mock
 
-      - name: Run unit tests (excluding integration)
-        run: pytest tests/ -v --ignore=tests/test_integration.py -m "not integration"
+      - name: Run unit tests
+        run: pytest tests/ -v -m "not integration"
 
   frontend-build:
     runs-on: ubuntu-latest
@@ -48,10 +47,10 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm ci
 
       - name: Type check
-        run: npx tsc --noEmit || true
+        run: npx tsc --noEmit
 
       - name: Build
         env:
