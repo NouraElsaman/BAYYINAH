@@ -30,6 +30,9 @@ services:
     environment:
       QDRANT_URL: http://qdrant:6333
       REDIS_URL: redis://redis:6379/0
+      # HF_HOME is set in Dockerfile; override here if needed for local dev.
+      # The hf_cache volume persists downloaded models across docker compose restarts.
+      HF_HOME: /data/hf_cache
     ports:
       - "8000:8000"
     depends_on:
@@ -37,6 +40,7 @@ services:
       - redis
     volumes:
       - uploads_data:/data/uploads
+      - hf_cache_data:/data/hf_cache
     restart: unless-stopped
 
   frontend:
@@ -58,3 +62,6 @@ volumes:
   qdrant_data:
   redis_data:
   uploads_data:
+  # hf_cache_data: named volume so BGE-M3 + reranker models (~11.3GB) are
+  # downloaded once and reused across docker compose restarts.
+  hf_cache_data:

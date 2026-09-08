@@ -1,4 +1,4 @@
-﻿services:
+services:
   - type: web
     name: bayyinah-backend
     region: frankfurt
@@ -13,8 +13,10 @@
         value: production
       - key: LOG_LEVEL
         value: INFO
+      # IMPORTANT: After deploying frontend to Vercel, replace the Vercel URL below.
+      # Add your actual Vercel URL via the Render dashboard (not here, to avoid committing it).
       - key: CORS_ORIGINS
-        value: '["https://bayyinah-frontend.onrender.com","https://bayyinah.vercel.app"]'
+        value: '["https://bayyinah-frontend.onrender.com"]'
       - key: QDRANT_URL
         sync: false
       - key: QDRANT_API_KEY
@@ -42,29 +44,40 @@
         value: /data/uploads
       - key: MAX_FILE_SIZE_MB
         value: "15"
+      # HF_HOME: Point HuggingFace model cache to the persistent disk so BGE-M3
+      # and bge-reranker-v2-m3 are NOT re-downloaded on every container restart.
+      # BGE-M3 ~9GB + reranker ~2.3GB = ~11.3GB total disk need.
+      # Ensure disk sizeGB below is at least 15 (leave headroom for uploads).
+      - key: HF_HOME
+        value: /data/hf_cache
     disk:
-      name: bayyinah-uploads
-      mountPath: /data/uploads
-      sizeGB: 1
+      name: bayyinah-data
+      mountPath: /data
+      sizeGB: 20
 
-  - type: web
-    name: bayyinah-frontend
-    runtime: docker
-    repo: https://github.com/NouraElsaman/BAYYINAH
-    dockerfilePath: ./frontend/Dockerfile
-    dockerContext: ./frontend
-    plan: starter
-    envVars:
-      - key: NEXT_PUBLIC_API_URL
-        value: https://bayyinah-backend.onrender.com
-    dockerCommand: node server.js
-
+  # Redis: managed by Render, auto-wired via REDIS_URL above
   - type: redis
     name: bayyinah-redis
     plan: starter
     ipAllowList: []
 
-# Qdrant: use Qdrant Cloud (https://cloud.qdrant.io) free tier.
-# Set QDRANT_URL / QDRANT_API_KEY in the Render dashboard for bayyinah-backend.
-# Memory: BGE-M3 + bge-reranker-v2-m3 require ~2-3GB RAM. Render standard = 2GB.
-# Upgrade to standard-plus (4GB) if OOM kills occur.
+# Architecture decision:
+#   Frontend -> Vercel (Next.js, auto-detected, free tier)
+#   Backend  -> Render Standard (2GB RAM, persistent disk for model cache)
+#   Redis    -> Render managed Redis
+#   Qdrant   -> Qdrant Cloud (external, set QDRANT_URL + QDRANT_API_KEY in dashboard)
+#   Groq     -> External API (set GROQ_API_KEY in dashboard)
+#   Tavily   -> Optional external API (set TAVILY_API_KEY in dashboard if enabled)
+#
+# Memory: BGE-M3 inference ~1.5GB + reranker ~400MB + FastAPI = ~2GB peak.
+#         Render Standard has 2GB RAM. OOM is possible under concurrent load.
+#         Upgrade to Standard Plus (4GB) if OOM kills occur.
+#
+# Model caching: HF_HOME=/data/hf_cache on persistent disk.
+#                First deploy downloads ~11.3GB (BGE-M3 + reranker). Subsequent
+#                restarts load from disk (30-60s) instead of downloading.
+#                Requires sizeGB >= 15 (set to 20 for safety).
+#
+# Note: bayyinah-frontend is NOT deployed to Render.
+#       Deploy frontend to Vercel (see docs/DEPLOYMENT.md for exact steps).
+#       After Vercel deploy, add your Vercel URL to CORS_ORIGINS via Render dashboard.
