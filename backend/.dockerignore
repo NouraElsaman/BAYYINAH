@@ -1,0 +1,47 @@
+﻿# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+*.egg-info/
+
+# Virtual environments
+.venv/
+venv/
+
+# Data - large corpus files, never in image
+data/
+
+# Dev/debug investigation scripts (not production code)
+analyze_*.py
+check_*.py
+compare_*.py
+count_*.py
+create_*.py
+debug_*.py
+final_test.py
+inspect_*.py
+run_reranker_eval.py
+search_*.py
+test_bm25.py
+test_reranker.py
+test_routing_fix.py
+test_scroll.py
+try_*.py
+scripts/test_*.py
+
+# Test suite (not needed in production image)
+tests/
+
+# Logs and runtime artifacts
+*.log
+user_feedback_log.csv
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

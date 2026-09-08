@@ -1,0 +1,78 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Node
+node_modules/
+.next/
+out/
+npm-debug.log*
+
+# Env
+.env
+.env.local
+*.local
+
+# Data — corpus, snapshots, evaluation artifacts (never commit large data files)
+/data/
+backend/data/
+*.log
+
+# Frontend build cache
+frontend/tsconfig.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Runtime-generated files
+backend/user_feedback_log.csv
+uploads/
+
+# Nested project directories (not part of BAYYINAH)
+extracted/
+digitlaw/
+
+# Backend dev/debug scripts (investigation artifacts, not production code)
+backend/analyze_*.py
+backend/check_*.py
+backend/compare_*.py
+backend/count_*.py
+backend/create_*.py
+backend/debug_*.py
+backend/final_test.py
+backend/inspect_*.py
+backend/run_reranker_eval.py
+backend/search_*.py
+backend/test_bm25.py
+backend/test_reranker.py
+backend/test_routing_fix.py
+backend/test_scroll.py
+backend/try_*.py
+backend/scripts/test_*.py
+
+# Internal sprint/process documentation (not public-facing)
+HANDOFF.md
+COMPLETION_REPORT.md
+IMPLEMENTATION_SUMMARY.md
+IMPLEMENTATION_VERIFICATION.md
+INDEX.md
+PROJECT_STATUS.md
+PERFORMANCE.md
+TEST_REPORT.md
+TESTING_QUICK_REFERENCE.md
+
+# Cleanup utility scripts (one-off, not production)
+scripts/strip_notebook_creds.py
+
+# Root-level docs superseded by docs/ directory
+DEPLOYMENT_GUIDE.md
+ROADMAP.md

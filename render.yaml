@@ -1,0 +1,70 @@
+﻿services:
+  - type: web
+    name: bayyinah-backend
+    region: frankfurt
+    runtime: docker
+    repo: https://github.com/NouraElsaman/BAYYINAH
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: standard
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      - key: CORS_ORIGINS
+        value: '["https://bayyinah-frontend.onrender.com","https://bayyinah.vercel.app"]'
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: QDRANT_COLLECTION
+        value: egypt_legal_rag
+      - key: EMBEDDING_MODEL
+        value: BAAI/bge-m3
+      - key: EMBEDDING_DEVICE
+        value: cpu
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: REDIS_URL
+        fromService:
+          name: bayyinah-redis
+          type: redis
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: UPLOAD_DIR
+        value: /data/uploads
+      - key: MAX_FILE_SIZE_MB
+        value: "15"
+    disk:
+      name: bayyinah-uploads
+      mountPath: /data/uploads
+      sizeGB: 1
+
+  - type: web
+    name: bayyinah-frontend
+    runtime: docker
+    repo: https://github.com/NouraElsaman/BAYYINAH
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    plan: starter
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://bayyinah-backend.onrender.com
+    dockerCommand: node server.js
+
+  - type: redis
+    name: bayyinah-redis
+    plan: starter
+    ipAllowList: []
+
+# Qdrant: use Qdrant Cloud (https://cloud.qdrant.io) free tier.
+# Set QDRANT_URL / QDRANT_API_KEY in the Render dashboard for bayyinah-backend.
+# Memory: BGE-M3 + bge-reranker-v2-m3 require ~2-3GB RAM. Render standard = 2GB.
+# Upgrade to standard-plus (4GB) if OOM kills occur.

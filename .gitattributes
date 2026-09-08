@@ -1,0 +1,25 @@
+# Normalize line endings to LF in the repository
+* text=auto eol=lf
+
+# Python
+*.py text eol=lf
+
+# JS/TS
+*.js text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+
+# Config
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.ini text eol=lf
+*.txt text eol=lf
+
+# Binary
+*.png binary
+*.jpg binary
+*.ico binary
+*.whl binary

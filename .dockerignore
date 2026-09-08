@@ -1,0 +1,37 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Node
+node_modules/
+frontend/.next/
+frontend/out/
+npm-debug.log*
+
+# Env - NEVER commit
+.env
+.env.local
+*.local
+
+# Data
+/data/
+backend/data/
+*.log
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Nested legacy project
+extracted/
+digitlaw/
+
+# Runtime artifacts
+backend/user_feedback_log.csv
+uploads/
