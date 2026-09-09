@@ -25,19 +25,31 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          # Install torch CPU wheel first to avoid downloading the 2.8 GB CUDA build.
-          # sentence-transformers and FlagEmbedding both depend on torch; without this
-          # flag pip resolves to the CUDA wheels from PyPI.
           pip install -r requirements.txt \
             --extra-index-url https://download.pytorch.org/whl/cpu
-          # Pin test-only dependencies for reproducible CI across runner updates.
           pip install \
             "pytest==9.1.1" \
             "pytest-asyncio==1.4.0" \
             "pytest-mock==3.15.1"
 
+      - name: Show installed package versions
+        run: |
+          python -c "
+          import importlib.metadata as m
+          for pkg in ['pytest', 'pytest-asyncio', 'pytest-mock', 'anyio', 'torch',
+                      'sentence-transformers', 'FlagEmbedding', 'langchain-core',
+                      'langgraph', 'pydantic', 'fastapi']:
+              try:
+                  print(f'{pkg}: {m.version(pkg)}')
+              except Exception as e:
+                  print(f'{pkg}: NOT INSTALLED ({e})')
+          "
+
+      - name: Test collection (dry run)
+        run: pytest tests/ --collect-only -q -m "not integration" 2>&1 | tail -5
+
       - name: Run unit tests
-        run: pytest tests/ -v -m "not integration"
+        run: pytest tests/ -v -m "not integration" --tb=short
 
   frontend-build:
     runs-on: ubuntu-latest
