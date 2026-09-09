@@ -1,5 +1,5 @@
 """
-conftest.py — shared fixtures for backend tests.
+conftest.py - shared fixtures for backend tests.
 Patches are non-autouse so they don't break tests that don't need mocking.
 The autouse fixtures that were causing module-not-found errors are replaced
 with per-test opt-in patches or lazy-import guards.
@@ -7,16 +7,32 @@ with per-test opt-in patches or lazy-import guards.
 import sys
 from unittest.mock import MagicMock, AsyncMock
 
-# ── Stub out heavy/unavailable packages before any app code is imported ──────
+# ---------------------------------------------------------------------------
+# Stub out heavy/unavailable packages BEFORE any app code is imported.
+# This prevents torch/CUDA initialization on CI runners that have no GPU,
+# and avoids downloading 2-9 GB of model weights during unit tests.
+# ---------------------------------------------------------------------------
 
 # groq
 groq_mock = MagicMock()
 groq_mock.AsyncGroq = MagicMock()
 sys.modules.setdefault("groq", groq_mock)
 
-# FlagEmbedding
+# FlagEmbedding (BGE-M3 embedding model - requires torch + 9GB download)
 fe_mock = MagicMock()
 sys.modules.setdefault("FlagEmbedding", fe_mock)
+
+# sentence_transformers (CrossEncoder reranker - imports torch at module level).
+# This stub prevents torch initialization on CI runners. The stub provides
+# a CrossEncoder class whose __init__ does nothing and whose predict()
+# returns empty scores - sufficient for all unit tests.
+st_mock = MagicMock()
+st_mock.CrossEncoder = MagicMock(
+    return_value=MagicMock(
+        predict=MagicMock(return_value=[]),
+    )
+)
+sys.modules.setdefault("sentence_transformers", st_mock)
 
 # qdrant_client  (already installed, but guard in case CI removes it)
 try:
@@ -29,7 +45,16 @@ except ImportError:
 # prometheus_client
 pc_mock = MagicMock()
 pc_mock.Counter = MagicMock(return_value=MagicMock(labels=MagicMock(return_value=MagicMock())))
-pc_mock.Histogram = MagicMock(return_value=MagicMock(time=MagicMock(return_value=MagicMock(__enter__=MagicMock(return_value=None), __exit__=MagicMock(return_value=False)))))
+pc_mock.Histogram = MagicMock(
+    return_value=MagicMock(
+        time=MagicMock(
+            return_value=MagicMock(
+                __enter__=MagicMock(return_value=None),
+                __exit__=MagicMock(return_value=False),
+            )
+        )
+    )
+)
 pc_mock.generate_latest = MagicMock(return_value=b"")
 pc_mock.CONTENT_TYPE_LATEST = "text/plain"
 sys.modules.setdefault("prometheus_client", pc_mock)
