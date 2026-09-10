@@ -31,11 +31,11 @@ jobs:
           pip install -r requirements.txt \
             --extra-index-url https://download.pytorch.org/whl/cpu
           # Pin test-only dependencies for reproducible CI.
-          # pytest-asyncio 1.x changed plugin initialization behaviour in a way
-          # that causes collection failures on Ubuntu runners; 0.23.8 is the last
-          # stable release before that rewrite and is proven reliable cross-platform.
+          # pytest-asyncio 0.23.8 requires pytest<9; use pytest 8.3.5 (latest 8.x).
+          # pytest-asyncio 1.x was tried but fails collection on ubuntu-latest
+          # due to asyncio event loop policy differences between Linux and Windows.
           pip install \
-            "pytest==9.1.1" \
+            "pytest==8.3.5" \
             "pytest-asyncio==0.23.8" \
             "pytest-mock==3.15.1"
 
