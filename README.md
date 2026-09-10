@@ -1,4 +1,4 @@
-# Ø¨ÙŠÙ‘Ù†Ø© | BAYYINAH â€” Egyptian Legal AI Assistant
+# بيّنة | BAYYINAH — Egyptian Legal AI Assistant
 
 > Arabic-first legal AI that answers Egyptian law questions in Egyptian dialect, grounded in 43,582 Egyptian legal articles.
 
@@ -11,25 +11,25 @@
 
 ## What It Does
 
-BAYYINAH answers Egyptian legal questions ("Ù‡Ù„ ÙŠØ¬ÙˆØ² ÙØµÙ„ Ø§Ù„Ø¹Ø§Ù…Ù„ Ø¨Ø¯ÙˆÙ† Ø³Ø¨Ø¨ØŸ") in Egyptian colloquial dialect, citing the exact law article. It **refuses to answer** when the retrieved corpus does not support the question â€” because hallucination in a legal context is dangerous.
+BAYYINAH answers Egyptian legal questions ("هل يجوز Ùصل العامل بدون سبب؟") in Egyptian colloquial dialect, citing the exact law article. It **refuses to answer** when the retrieved corpus does not support the question — because hallucination in a legal context is dangerous.
 
 Two products:
-- **Legal Assistant** â€” conversational RAG over Egyptian law, multi-turn, streaming
-- **Contract Analysis** â€” clause extraction, risk detection, and structured PDF/DOCX analysis
+- **Legal Assistant** — conversational RAG over Egyptian law, multi-turn, streaming
+- **Contract Analysis** — clause extraction, risk detection, and structured PDF/DOCX analysis
 
 ---
 
 ## Key Features
 
-- ðŸ—£ï¸ **Egyptian dialect-first** â€” answers in colloquial Arabic, not formal MSA
-- ðŸ“š **Grounded generation** â€” every answer cites the specific law article and refuses unsupported claims
-- ðŸ” **Hybrid retrieval** â€” dense (BGE-M3) + BM25 + Reciprocal Rank Fusion
-- ðŸŽ¯ **Cross-encoder reranking** â€” BAAI/bge-reranker-v2-m3 with adaptive skip for article-reference queries
-- ðŸ§  **Multi-turn memory** â€” Redis-backed conversation history
-- ðŸ“„ **Contract analysis** â€” PDF/DOCX upload, clause analysis, risk detection
-- ðŸ”„ **Streaming responses** â€” real-time SSE token streaming
-- ðŸ“Š **Observability** â€” Prometheus metrics + JSON structured logging
-- ðŸ›¡ï¸ **Guardrails** â€” faithfulness, citation mismatch, unsafe request detection
+- 🗣ï¸ **Egyptian dialect-first** — answers in colloquial Arabic, not formal MSA
+- 📚 **Grounded generation** — every answer cites the specific law article and refuses unsupported claims
+- ðŸ” **Hybrid retrieval** — dense (BGE-M3) + BM25 + Reciprocal Rank Fusion
+- 🎯 **Cross-encoder reranking** — BAAI/bge-reranker-v2-m3 with adaptive skip for article-reference queries
+- 🧠 **Multi-turn memory** — Redis-backed conversation history
+- 📄 **Contract analysis** — PDF/DOCX upload, clause analysis, risk detection
+- 🔄 **Streaming responses** — real-time SSE token streaming
+- 📊 **Observability** — Prometheus metrics + JSON structured logging
+- 🛡ï¸ **Guardrails** — faithfulness, citation mismatch, unsafe request detection
 
 ---
 
@@ -39,42 +39,42 @@ Two products:
 
 ```
 User question (Egyptian dialect or formal Arabic)
-â”‚
-â”œâ”€â”€ detect_domain â”€â”€â”€â”€â”€â”€â”€â”€ law_type filter (labor/tenancy/family/criminal/civil)
-â”œâ”€â”€ query_expansion â”€â”€â”€â”€â”€â”€â”€ HyDE: generate hypothetical article, embed it
-â”œâ”€â”€ retrieve â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ BGE-M3 dense + BM25 sparse â†’ RRF fusion â†’ top-8
-â”‚   â””â”€â”€ rerank â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ BAAI/bge-reranker-v2-m3 cross-encoder â†’ top-5
-â”‚                           (skip if explicit article reference at top-1)
-â”œâ”€â”€ confidence_score â”€â”€â”€â”€â”€â”€â”€ multi-signal confidence check
-â”‚   â”œâ”€â”€ [high] â†’ answer_synthesis
-â”‚   â””â”€â”€ [low]  â†’ web_search (Tavily) â†’ answer_synthesis
-â”œâ”€â”€ cite â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ token-budget citation truncation
-â”œâ”€â”€ generate_answer â”€â”€â”€â”€â”€â”€â”€ openai/gpt-oss-120b via Groq + conversation history
-â””â”€â”€ verify â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ faithfulness, citation mismatch, safety guardrails
+│
+├── detect_domain ──────── law_type filter (labor/tenancy/family/criminal/civil)
+├── query_expansion ─────── HyDE: generate hypothetical article, embed it
+├── retrieve ────────────── BGE-M3 dense + BM25 sparse → RRF fusion → top-8
+│   └── rerank ──────────── BAAI/bge-reranker-v2-m3 cross-encoder → top-5
+│                           (skip if explicit article reference at top-1)
+├── confidence_score ─────── multi-signal confidence check
+│   ├── [high] → answer_synthesis
+│   └── [low]  → web_search (Tavily) → answer_synthesis
+├── cite ────────────────── token-budget citation truncation
+├── generate_answer ─────── openai/gpt-oss-120b via Groq + conversation history
+└── verify ──────────────── faithfulness, citation mismatch, safety guardrails
 ```
 
 ### Services
 
 ```
 frontend (Next.js 14)
-â”‚
-â”‚  POST /chat           POST /chat/stream        POST /contract-analysis
-â”‚  GET  /health         GET  /metrics (Prometheus)
-â”‚
+│
+│  POST /chat           POST /chat/stream        POST /contract-analysis
+│  GET  /health         GET  /metrics (Prometheus)
+│
 backend (FastAPI + LangGraph)
-â”‚
-â”œâ”€â”€ Legal Assistant Graph (8 nodes)
-â”‚   detect_domain â†’ query_expansion â†’ retrieve â†’ web_search?
-â”‚   â†’ answer_synthesis â†’ cite â†’ generate_answer â†’ verify
-â”‚
-â””â”€â”€ Contract Analysis Graph
-    extract â†’ chunk â†’ analyze_clauses â†’ detect_risks â†’ summarize
-â”‚
-â”œâ”€â”€ Qdrant Cloud       (vector store â€” egypt_legal_rag collection, 43,582 vectors)
-â”œâ”€â”€ BAAI/bge-m3        (dense embeddings, 1024-dim)
-â”œâ”€â”€ BAAI/bge-reranker-v2-m3  (cross-encoder reranker, CPU)
-â”œâ”€â”€ Groq               (LLM API â€” openai/gpt-oss-120b)
-â””â”€â”€ Redis              (conversation memory, optional)
+│
+├── Legal Assistant Graph (8 nodes)
+│   detect_domain → query_expansion → retrieve → web_search?
+│   → answer_synthesis → cite → generate_answer → verify
+│
+└── Contract Analysis Graph
+    extract → chunk → analyze_clauses → detect_risks → summarize
+│
+├── Qdrant Cloud       (vector store — egypt_legal_rag collection, 43,582 vectors)
+├── BAAI/bge-m3        (dense embeddings, 1024-dim)
+├── BAAI/bge-reranker-v2-m3  (cross-encoder reranker, CPU)
+├── Groq               (LLM API — openai/gpt-oss-120b)
+└── Redis              (conversation memory, optional)
 ```
 
 ---
@@ -106,9 +106,9 @@ cp .env.example .env
 docker compose up --build
 ```
 
-- Frontend â†’ http://localhost:3000
-- Backend API â†’ http://localhost:8000/docs
-- Qdrant UI â†’ http://localhost:6333/dashboard
+- Frontend → http://localhost:3000
+- Backend API → http://localhost:8000/docs
+- Qdrant UI → http://localhost:6333/dashboard
 
 ---
 
@@ -118,13 +118,13 @@ Copy `.env.example` to `.env` and fill in the required values:
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `GROQ_API_KEY` | âœ… | Groq API key (get at console.groq.com) |
-| `QDRANT_URL` | âœ… | Qdrant server URL |
+| `GROQ_API_KEY` | ✅ | Groq API key (get at console.groq.com) |
+| `QDRANT_URL` | ✅ | Qdrant server URL |
 | `QDRANT_API_KEY` | Cloud only | Qdrant JWT token |
 | `QDRANT_COLLECTION` | default: `egypt_legal_rag` | Collection name |
 | `GROQ_MODEL` | default: `openai/gpt-oss-120b` | Groq model name |
-| `SECRET_KEY` | âœ… production | JWT signing secret |
-| `CORS_ORIGINS` | âœ… production | Allowed frontend origins (JSON array) |
+| `SECRET_KEY` | ✅ production | JWT signing secret |
+| `CORS_ORIGINS` | ✅ production | Allowed frontend origins (JSON array) |
 | `REDIS_URL` | optional | Redis for conversation memory |
 | `TAVILY_API_KEY` | optional | Web search fallback (disabled by default) |
 | `NEXT_PUBLIC_API_URL` | frontend | Backend base URL |
@@ -180,7 +180,7 @@ python ../scripts/ingest.py \
   --collection egypt_legal_rag \
   --batch-size 32
 
-# Option 2: Notebook (Colab/Kaggle â€” downloads corpus from HuggingFace)
+# Option 2: Notebook (Colab/Kaggle — downloads corpus from HuggingFace)
 # Open bayyinah_ingest.ipynb and follow the instructions
 # Set QDRANT_URL / QDRANT_API_KEY as environment secrets before running
 ```
@@ -191,14 +191,14 @@ python ../scripts/ingest.py \
 {
   "chunk_id": "labor_12_2003_art69",
   "doc_id": "labor_12_2003",
-  "law_name": "Ù‚Ø§Ù†ÙˆÙ† Ø§Ù„Ø¹Ù…Ù„",
+  "law_name": "قانون العمل",
   "law_number": "12",
   "law_year": "2003",
   "law_type": "labor",
   "category": "labor_law",
   "article_number": "69",
-  "text": "Ù†Øµ Ø§Ù„Ù…Ø§Ø¯Ø© Ø§Ù„ØªØ§Ø³Ø¹Ø© ÙˆØ§Ù„Ø³ØªÙŠÙ†...",
-  "context_text": "Ù†Øµ Ø§Ù„Ø³ÙŠØ§Ù‚...",
+  "text": "نص المادة التاسعة والستين...",
+  "context_text": "نص السياق...",
   "cross_references": ["labor_12_2003_art68"]
 }
 ```
@@ -215,7 +215,7 @@ See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for the complete deployment guide
 **Quick deploy:**
 
 1. Push this repository to GitHub.
-2. In Render dashboard â†’ **New â†’ Blueprint** â†’ select this repo.
+2. In Render dashboard → **New → Blueprint** → select this repo.
 3. Render reads `render.yaml` and creates:
    - `digitlaw-backend` (Docker, standard plan)
    - `digitlaw-frontend` (Docker, starter plan)
@@ -236,7 +236,7 @@ See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for the complete deployment guide
 
 ```json
 {
-  "question": "Ù‡Ù„ ÙŠØ¬ÙˆØ² ÙØµÙ„ Ø§Ù„Ø¹Ø§Ù…Ù„ Ø¨Ø¯ÙˆÙ† Ø³Ø¨Ø¨ØŸ",
+  "question": "هل يجوز Ùصل العامل بدون سبب؟",
   "conversation_id": "optional-uuid",
   "stream": false
 }
@@ -246,15 +246,15 @@ Response:
 ```json
 {
   "conversation_id": "uuid",
-  "answer": "Ù„Ø£ØŒ Ù…Ø´ ÙŠÙ†ÙØ¹ ØµØ§Ø­Ø¨ Ø§Ù„Ø´ØºÙ„ ÙŠØ·Ø±Ø¯Ùƒ Ù…Ù† ØºÙŠØ± Ø³Ø¨Ø¨ Ù‚Ø§Ù†ÙˆÙ†ÙŠ...",
+  "answer": "لأ، مش ينÙع صاحب الشغل يطردك من غير سبب قانوني...",
   "citations": [
     {
       "chunk_id": "labor_12_2003_art69",
-      "law_name": "Ù‚Ø§Ù†ÙˆÙ† Ø§Ù„Ø¹Ù…Ù„",
+      "law_name": "قانون العمل",
       "law_number": "12",
       "law_year": "2003",
       "article_number": "69",
-      "text": "Ù†Øµ Ø§Ù„Ù…Ø§Ø¯Ø©...",
+      "text": "نص المادة...",
       "score": 0.94
     }
   ],
@@ -268,9 +268,9 @@ Response:
 ### `POST /chat/stream`
 
 Same body as `/chat`. Returns `text/event-stream`:
-- `data: {"type":"token","content":"..."}` â€” streaming tokens
-- `data: {"type":"done","final_answer":"...","citations":[...],"is_fallback":false}` â€” completion
-- `data: {"type":"error","message":"..."}` â€” guardrail or server error
+- `data: {"type":"token","content":"..."}` — streaming tokens
+- `data: {"type":"done","final_answer":"...","citations":[...],"is_fallback":false}` — completion
+- `data: {"type":"error","message":"..."}` — guardrail or server error
 
 ### `POST /contract-analysis`
 
@@ -304,52 +304,52 @@ Prometheus text format metrics including request counts, latency histograms, fai
 
 ```
 bayyinah/
-â”œâ”€â”€ backend/
-â”‚   â”œâ”€â”€ app/
-â”‚   â”‚   â”œâ”€â”€ main.py                   FastAPI app + middleware
-â”‚   â”‚   â”œâ”€â”€ core/
-â”‚   â”‚   â”‚   â”œâ”€â”€ config.py             Pydantic settings (all env vars)
-â”‚   â”‚   â”‚   â””â”€â”€ logging.py            JSON structured logging
-â”‚   â”‚   â”œâ”€â”€ services/
-â”‚   â”‚   â”‚   â”œâ”€â”€ embedding_service.py  BAAI/bge-m3 (singleton)
-â”‚   â”‚   â”‚   â”œâ”€â”€ retrieval_service.py  Qdrant + BM25 + RRF
-â”‚   â”‚   â”‚   â”œâ”€â”€ reranker_service.py   BGE-reranker-v2-m3 (CPU)
-â”‚   â”‚   â”‚   â”œâ”€â”€ bm25_service.py       Arabic BM25 tokenization
-â”‚   â”‚   â”‚   â”œâ”€â”€ confidence_scorer.py  Retrieval confidence scoring
-â”‚   â”‚   â”‚   â”œâ”€â”€ memory_service.py     Redis conversation memory
-â”‚   â”‚   â”‚   â”œâ”€â”€ llm_service.py        Groq async client
-â”‚   â”‚   â”‚   â””â”€â”€ web_search_service.py Tavily web search fallback
-â”‚   â”‚   â”œâ”€â”€ graphs/
-â”‚   â”‚   â”‚   â”œâ”€â”€ legal_assistant/      8-node LangGraph pipeline
-â”‚   â”‚   â”‚   â””â”€â”€ contract_analysis/    LangGraph contract pipeline
-â”‚   â”‚   â””â”€â”€ api/
-â”‚   â”‚       â”œâ”€â”€ chat.py               POST /chat, POST /chat/stream
-â”‚   â”‚       â”œâ”€â”€ contract.py           POST /contract-analysis
-â”‚   â”‚       â””â”€â”€ system.py             GET /health, GET /metrics
-â”‚   â”œâ”€â”€ tests/                        245 unit tests
-â”‚   â”œâ”€â”€ requirements.txt
-â”‚   â””â”€â”€ Dockerfile
-â”œâ”€â”€ frontend/
-â”‚   â”œâ”€â”€ src/
-â”‚   â”‚   â”œâ”€â”€ app/                      Next.js App Router pages
-â”‚   â”‚   â”œâ”€â”€ components/               Chat, contract, citation UI
-â”‚   â”‚   â””â”€â”€ lib/                      API client, SSE streaming
-â”‚   â”œâ”€â”€ package.json
-â”‚   â””â”€â”€ Dockerfile
-â”œâ”€â”€ docs/
-â”‚   â”œâ”€â”€ PROJECT_EVOLUTION.md          Engineering decisions history
-â”‚   â”œâ”€â”€ INTERVIEW_GUIDE.md            Technical explanations
-â”‚   â””â”€â”€ DEPLOYMENT.md                 Full deployment guide
-â”œâ”€â”€ scripts/
-â”‚   â””â”€â”€ ingest.py                     Corpus ingestion CLI
-â”œâ”€â”€ bayyinah_ingest.ipynb             GPU-accelerated Colab/Kaggle ingestion
-â”œâ”€â”€ docker-compose.yml                Local development orchestration
-â”œâ”€â”€ render.yaml                       Render Blueprint deployment
-â”œâ”€â”€ .env.example                      Environment variable template
-â””â”€â”€ .github/
-    â””â”€â”€ workflows/
-        â”œâ”€â”€ ci.yml                    Test + build on push/PR
-        â””â”€â”€ deploy.yml                Trigger Render deploy on main
+├── backend/
+│   ├── app/
+│   │   ├── main.py                   FastAPI app + middleware
+│   │   ├── core/
+│   │   │   ├── config.py             Pydantic settings (all env vars)
+│   │   │   └── logging.py            JSON structured logging
+│   │   ├── services/
+│   │   │   ├── embedding_service.py  BAAI/bge-m3 (singleton)
+│   │   │   ├── retrieval_service.py  Qdrant + BM25 + RRF
+│   │   │   ├── reranker_service.py   BGE-reranker-v2-m3 (CPU)
+│   │   │   ├── bm25_service.py       Arabic BM25 tokenization
+│   │   │   ├── confidence_scorer.py  Retrieval confidence scoring
+│   │   │   ├── memory_service.py     Redis conversation memory
+│   │   │   ├── llm_service.py        Groq async client
+│   │   │   └── web_search_service.py Tavily web search fallback
+│   │   ├── graphs/
+│   │   │   ├── legal_assistant/      8-node LangGraph pipeline
+│   │   │   └── contract_analysis/    LangGraph contract pipeline
+│   │   └── api/
+│   │       ├── chat.py               POST /chat, POST /chat/stream
+│   │       ├── contract.py           POST /contract-analysis
+│   │       └── system.py             GET /health, GET /metrics
+│   ├── tests/                        245 unit tests
+│   ├── requirements.txt
+│   └── Dockerfile
+├── frontend/
+│   ├── src/
+│   │   ├── app/                      Next.js App Router pages
+│   │   ├── components/               Chat, contract, citation UI
+│   │   └── lib/                      API client, SSE streaming
+│   ├── package.json
+│   └── Dockerfile
+├── docs/
+│   ├── PROJECT_EVOLUTION.md          Engineering decisions history
+│   ├── INTERVIEW_GUIDE.md            Technical explanations
+│   └── DEPLOYMENT.md                 Full deployment guide
+├── scripts/
+│   └── ingest.py                     Corpus ingestion CLI
+├── bayyinah_ingest.ipynb             GPU-accelerated Colab/Kaggle ingestion
+├── docker-compose.yml                Local development orchestration
+├── render.yaml                       Render Blueprint deployment
+├── .env.example                      Environment variable template
+└── .github/
+    └── workflows/
+        ├── ci.yml                    Test + build on push/PR
+        └── deploy.yml                Trigger Render deploy on main
 ```
 
 ---
@@ -358,7 +358,7 @@ bayyinah/
 
 | Document | Description |
 |----------|-------------|
-| [`docs/PROJECT_EVOLUTION.md`](docs/PROJECT_EVOLUTION.md) | Complete engineering history â€” retrieval experiments, reranker optimization, model migration |
+| [`docs/PROJECT_EVOLUTION.md`](docs/PROJECT_EVOLUTION.md) | Complete engineering history — retrieval experiments, reranker optimization, model migration |
 | [`docs/INTERVIEW_GUIDE.md`](docs/INTERVIEW_GUIDE.md) | Deep technical Q&A for interviews and Master's discussions |
 | [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Full deployment configuration and troubleshooting |
 
@@ -366,4 +366,4 @@ bayyinah/
 
 ## License
 
-MIT License â€” see [LICENSE](LICENSE)
+MIT License — see [LICENSE](LICENSE)
