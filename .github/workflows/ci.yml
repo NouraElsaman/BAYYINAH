@@ -25,41 +25,22 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
+          # Install torch CPU wheel to avoid the 2.8 GB CUDA build on Ubuntu runners.
+          # sentence-transformers and FlagEmbedding both pull torch transitively;
+          # without --extra-index-url pip resolves to CUDA wheels from PyPI.
           pip install -r requirements.txt \
             --extra-index-url https://download.pytorch.org/whl/cpu
+          # Pin test-only dependencies for reproducible CI.
+          # pytest-asyncio 1.x changed plugin initialization behaviour in a way
+          # that causes collection failures on Ubuntu runners; 0.23.8 is the last
+          # stable release before that rewrite and is proven reliable cross-platform.
           pip install \
             "pytest==9.1.1" \
-            "pytest-asyncio==1.4.0" \
+            "pytest-asyncio==0.23.8" \
             "pytest-mock==3.15.1"
 
-      - name: Show installed package versions
-        run: |
-          python -c "
-          import importlib.metadata as m
-          for pkg in ['pytest', 'pytest-asyncio', 'anyio', 'torch', 'sentence-transformers', 'FlagEmbedding']:
-              try:
-                  print(f'{pkg}: {m.version(pkg)}')
-              except Exception as e:
-                  print(f'{pkg}: not found')
-          "
-
-      - name: Test collection (dry run)
-        run: |
-          pytest tests/ --collect-only -q -m "not integration"
-          echo "Collection exit code: $?"
-
-      - name: Run first 5 tests only (isolation)
-        run: |
-          pytest tests/test_adaptive_reranking.py -v --tb=long 2>&1 || true
-          echo "---"
-          pytest tests/test_answer_synthesis.py -v --tb=long 2>&1 || true
-          echo "---"
-          pytest tests/test_chat_memory.py -v --tb=long 2>&1 || true
-
       - name: Run unit tests
-        run: |
-          python -m pytest tests/ -v -m "not integration" --tb=long 2>&1
-          echo "Pytest exit: $?"
+        run: pytest tests/ -v -m "not integration" --tb=short
 
   frontend-build:
     runs-on: ubuntu-latest
