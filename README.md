@@ -11,7 +11,7 @@
 
 ## What It Does
 
-BAYYINAH answers Egyptian legal questions ("هل يجوز Ùصل العامل بدون سبب؟") in Egyptian colloquial dialect, citing the exact law article. It **refuses to answer** when the retrieved corpus does not support the question — because hallucination in a legal context is dangerous.
+BAYYINAH answers Egyptian legal questions ("هل يجوز فصل العامل بدون سبب؟") in Egyptian colloquial dialect, citing the exact law article. It **refuses to answer** when the retrieved corpus does not support the question — because hallucination in a legal context is dangerous.
 
 Two products:
 - **Legal Assistant** — conversational RAG over Egyptian law, multi-turn, streaming
@@ -21,15 +21,15 @@ Two products:
 
 ## Key Features
 
-- 🗣ï¸ **Egyptian dialect-first** — answers in colloquial Arabic, not formal MSA
-- 📚 **Grounded generation** — every answer cites the specific law article and refuses unsupported claims
-- ðŸ” **Hybrid retrieval** — dense (BGE-M3) + BM25 + Reciprocal Rank Fusion
-- 🎯 **Cross-encoder reranking** — BAAI/bge-reranker-v2-m3 with adaptive skip for article-reference queries
-- 🧠 **Multi-turn memory** — Redis-backed conversation history
-- 📄 **Contract analysis** — PDF/DOCX upload, clause analysis, risk detection
-- 🔄 **Streaming responses** — real-time SSE token streaming
-- 📊 **Observability** — Prometheus metrics + JSON structured logging
-- 🛡ï¸ **Guardrails** — faithfulness, citation mismatch, unsafe request detection
+- **Egyptian dialect-first** — answers in colloquial Arabic, not formal MSA
+- **Grounded generation** — every answer cites the specific law article and refuses unsupported claims
+- **Hybrid retrieval** — dense (BGE-M3) + BM25 + Reciprocal Rank Fusion
+- **Cross-encoder reranking** — BAAI/bge-reranker-v2-m3 with adaptive skip for article-reference queries
+- **Multi-turn memory** — Redis-backed conversation history
+- **Contract analysis** — PDF/DOCX upload, clause analysis, risk detection
+- **Streaming responses** — real-time SSE token streaming
+- **Observability** — Prometheus metrics + JSON structured logging
+- **Guardrails** — faithfulness, citation mismatch, unsafe request detection
 
 ---
 
@@ -236,7 +236,7 @@ See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for the complete deployment guide
 
 ```json
 {
-  "question": "هل يجوز Ùصل العامل بدون سبب؟",
+  "question": "هل يجوز فصل العامل بدون سبب؟",
   "conversation_id": "optional-uuid",
   "stream": false
 }
@@ -246,7 +246,7 @@ Response:
 ```json
 {
   "conversation_id": "uuid",
-  "answer": "لأ، مش ينÙع صاحب الشغل يطردك من غير سبب قانوني...",
+  "answer": "لأ مش ينفع صاحب الشغل يطردك منغير سبب قانوني...",
   "citations": [
     {
       "chunk_id": "labor_12_2003_art69",
