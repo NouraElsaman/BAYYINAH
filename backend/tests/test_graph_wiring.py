@@ -53,7 +53,7 @@ def test_graph_compiles_successfully():
 # Smoke test: high confidence node execution order
 # ---------------------------------------------------------------------------
 
-async def test_retrieve_synthesis_cite_generate_order_high_confidence():
+def test_retrieve_synthesis_cite_generate_order_high_confidence():
     """
     Verify that when retrieval_confidence is high, execution routes:
     retrieve â†’ answer_synthesis â†’ cite â†’ generate_answer
@@ -129,7 +129,8 @@ async def test_retrieve_synthesis_cite_generate_order_high_confidence():
         # Run with high confidence -> should route straight to synthesis (skipping web)
         state_high = _base_state()
         state_high["retrieval_confidence"] = 0.90
-        await compiled.ainvoke(state_high)
+        import asyncio
+        asyncio.run(compiled.ainvoke(state_high))
     finally:
         for p in patches:
             p.stop()
@@ -155,7 +156,7 @@ async def test_retrieve_synthesis_cite_generate_order_high_confidence():
 # Smoke test: low confidence node execution order
 # ---------------------------------------------------------------------------
 
-async def test_low_confidence_routes_through_web_search():
+def test_low_confidence_routes_through_web_search():
     """Verify that when retrieval_confidence is low, graph routes:
     retrieve â†’ web_search â†’ answer_synthesis â†’ cite â†’ generate_answer
     """
@@ -226,7 +227,8 @@ async def test_low_confidence_routes_through_web_search():
         # Run with low confidence -> should route retrieve -> web_search -> answer_synthesis
         state_low = _base_state()
         state_low["retrieval_confidence"] = 0.10
-        await compiled.ainvoke(state_low)
+        import asyncio
+        asyncio.run(compiled.ainvoke(state_low))
     finally:
         for p in patches:
             p.stop()
