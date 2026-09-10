@@ -5,10 +5,10 @@ Smoke tests verifying that the compiled LangGraph executes nodes in the
 correct order after Sprint 3 Phase 2 Task 8 (Answer Synthesis Agent wired in).
 
 Expected order (high confidence path):
-  detect_domain → query_expansion → retrieve → answer_synthesis → cite → generate_answer → verify
+  detect_domain â†’ query_expansion â†’ retrieve â†’ answer_synthesis â†’ cite â†’ generate_answer â†’ verify
 
 Expected order (low confidence path):
-  detect_domain → query_expansion → retrieve → web_search → answer_synthesis → cite → generate_answer → verify
+  detect_domain â†’ query_expansion â†’ retrieve â†’ web_search â†’ answer_synthesis â†’ cite â†’ generate_answer â†’ verify
 """
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ except ImportError:
 
 def _base_state():
     return {
-        "question": "هل يجوز فصل العامل بدون سبب وفقًا لقانون العمل المصري؟",
+        "question": "Ù‡Ù„ ÙŠØ¬ÙˆØ² ÙØµÙ„ Ø§Ù„Ø¹Ø§Ù…Ù„ Ø¨Ø¯ÙˆÙ† Ø³Ø¨Ø¨ ÙˆÙÙ‚Ù‹Ø§ Ù„Ù‚Ø§Ù†ÙˆÙ† Ø§Ù„Ø¹Ù…Ù„ Ø§Ù„Ù…ØµØ±ÙŠØŸ",
         "conversation_id": "test-conv-1",
         "request_id": "req-001",
         "warnings": [],
@@ -53,10 +53,10 @@ def test_graph_compiles_successfully():
 # Smoke test: high confidence node execution order
 # ---------------------------------------------------------------------------
 
-def test_retrieve_synthesis_cite_generate_order_high_confidence():
+async def test_retrieve_synthesis_cite_generate_order_high_confidence():
     """
     Verify that when retrieval_confidence is high, execution routes:
-    retrieve → answer_synthesis → cite → generate_answer
+    retrieve â†’ answer_synthesis â†’ cite â†’ generate_answer
     """
     call_log: list[str] = []
 
@@ -129,8 +129,7 @@ def test_retrieve_synthesis_cite_generate_order_high_confidence():
         # Run with high confidence -> should route straight to synthesis (skipping web)
         state_high = _base_state()
         state_high["retrieval_confidence"] = 0.90
-        import asyncio
-        asyncio.run(compiled.ainvoke(state_high))
+        await compiled.ainvoke(state_high)
     finally:
         for p in patches:
             p.stop()
@@ -156,9 +155,9 @@ def test_retrieve_synthesis_cite_generate_order_high_confidence():
 # Smoke test: low confidence node execution order
 # ---------------------------------------------------------------------------
 
-def test_low_confidence_routes_through_web_search():
+async def test_low_confidence_routes_through_web_search():
     """Verify that when retrieval_confidence is low, graph routes:
-    retrieve → web_search → answer_synthesis → cite → generate_answer
+    retrieve â†’ web_search â†’ answer_synthesis â†’ cite â†’ generate_answer
     """
     call_log: list[str] = []
 
@@ -227,8 +226,7 @@ def test_low_confidence_routes_through_web_search():
         # Run with low confidence -> should route retrieve -> web_search -> answer_synthesis
         state_low = _base_state()
         state_low["retrieval_confidence"] = 0.10
-        import asyncio
-        asyncio.run(compiled.ainvoke(state_low))
+        await compiled.ainvoke(state_low)
     finally:
         for p in patches:
             p.stop()

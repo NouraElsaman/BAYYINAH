@@ -25,32 +25,24 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
+          # Install torch CPU wheel to avoid the 2.8 GB CUDA build on Ubuntu runners.
+          # sentence-transformers and FlagEmbedding both pull torch transitively;
+          # without --extra-index-url pip resolves to CUDA wheels from PyPI.
           pip install -r requirements.txt \
             --extra-index-url https://download.pytorch.org/whl/cpu
+          # Pin test-only dependencies for reproducible CI.
+          # pytest-asyncio 0.23.8 (pre-1.x) is pinned because:
+          #   - 1.x changes plugin initialization in a way that crashes on Ubuntu
+          #   - 0.23.8 requires pytest<9, hence pytest==8.3.5
+          # anyio's pytest plugin is disabled via pytest.ini addopts=-p no:anyio
+          # because anyio 4.x imports _pytest private internals that fail on Linux.
           pip install \
             "pytest==8.3.5" \
             "pytest-asyncio==0.23.8" \
             "pytest-mock==3.15.1"
 
-      - name: Run unit tests (capture output)
-        run: |
-          set +e
-          python -m pytest tests/ -v -m "not integration" --tb=long \
-            2>&1 | tee /tmp/pytest_output.txt
-          PYTEST_EXIT=$?
-          echo "PYTEST_EXIT_CODE=$PYTEST_EXIT" >> $GITHUB_ENV
-          echo "=== LAST 100 LINES OF PYTEST OUTPUT ==="
-          tail -100 /tmp/pytest_output.txt
-          echo "=== END ==="
-          exit $PYTEST_EXIT
-
-      - name: Upload pytest output on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: pytest-output
-          path: /tmp/pytest_output.txt
-          retention-days: 1
+      - name: Run unit tests
+        run: pytest tests/ -v -m "not integration" --tb=short
 
   frontend-build:
     runs-on: ubuntu-latest

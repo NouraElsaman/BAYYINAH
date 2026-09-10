@@ -254,7 +254,7 @@ class TestWebSearchServiceHTTPClient:
 # ---------------------------------------------------------------------------
 
 class TestLifespanWarmUp:
-    def test_main_lifespan_calls_embedding_warmup(self):
+    async def test_main_lifespan_calls_embedding_warmup(self):
         """Lifespan startup must trigger embedding warm-up."""
         import asyncio
 
@@ -281,6 +281,6 @@ class TestLifespanWarmUp:
                 async with lifespan(app):
                     pass
 
-            asyncio.run(run())
+            await run()
 
         assert warmup_called, "Lifespan startup must call embedder.warm_up()"

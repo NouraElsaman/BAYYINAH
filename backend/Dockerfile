@@ -17,13 +17,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install uv for faster installs
-RUN pip install --no-cache-dir uv
-
-# Install Python dependencies
+# Install Python dependencies.
+# --extra-index-url points to the PyTorch CPU-only wheel index so that
+# sentence-transformers / FlagEmbedding do not pull the 2.8 GB CUDA build.
 COPY requirements.txt .
-RUN uv pip install --system --no-cache-dir \
-    --index-url https://pypi.org/simple \
+RUN pip install --no-cache-dir \
     --extra-index-url https://download.pytorch.org/whl/cpu \
     -r requirements.txt
 
