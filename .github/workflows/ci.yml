@@ -25,22 +25,32 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          # Install torch CPU wheel to avoid the 2.8 GB CUDA build on Ubuntu runners.
-          # sentence-transformers and FlagEmbedding both pull torch transitively;
-          # without --extra-index-url pip resolves to CUDA wheels from PyPI.
           pip install -r requirements.txt \
             --extra-index-url https://download.pytorch.org/whl/cpu
-          # Pin test-only dependencies for reproducible CI.
-          # pytest-asyncio 0.23.8 requires pytest<9; use pytest 8.3.5 (latest 8.x).
-          # pytest-asyncio 1.x was tried but fails collection on ubuntu-latest
-          # due to asyncio event loop policy differences between Linux and Windows.
           pip install \
             "pytest==8.3.5" \
             "pytest-asyncio==0.23.8" \
             "pytest-mock==3.15.1"
 
-      - name: Run unit tests
-        run: pytest tests/ -v -m "not integration" --tb=short
+      - name: Run unit tests (capture output)
+        run: |
+          set +e
+          python -m pytest tests/ -v -m "not integration" --tb=long \
+            2>&1 | tee /tmp/pytest_output.txt
+          PYTEST_EXIT=$?
+          echo "PYTEST_EXIT_CODE=$PYTEST_EXIT" >> $GITHUB_ENV
+          echo "=== LAST 100 LINES OF PYTEST OUTPUT ==="
+          tail -100 /tmp/pytest_output.txt
+          echo "=== END ==="
+          exit $PYTEST_EXIT
+
+      - name: Upload pytest output on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-output
+          path: /tmp/pytest_output.txt
+          retention-days: 1
 
   frontend-build:
     runs-on: ubuntu-latest
