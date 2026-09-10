@@ -25,24 +25,30 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          # Install torch CPU wheel to avoid the 2.8 GB CUDA build on Ubuntu runners.
-          # sentence-transformers and FlagEmbedding both pull torch transitively;
-          # without --extra-index-url pip resolves to CUDA wheels from PyPI.
           pip install -r requirements.txt \
             --extra-index-url https://download.pytorch.org/whl/cpu
-          # Pin test-only dependencies for reproducible CI.
-          # pytest-asyncio 0.23.8 (pre-1.x) is pinned because:
-          #   - 1.x changes plugin initialization in a way that crashes on Ubuntu
-          #   - 0.23.8 requires pytest<9, hence pytest==8.3.5
-          # anyio's pytest plugin is disabled via pytest.ini addopts=-p no:anyio
-          # because anyio 4.x imports _pytest private internals that fail on Linux.
           pip install \
             "pytest==8.3.5" \
             "pytest-asyncio==0.23.8" \
             "pytest-mock==3.15.1"
 
+      - name: Show installed test-relevant packages
+        run: |
+          echo "=== Python version ==="
+          python --version
+          echo "=== Test package versions ==="
+          pip show pytest pytest-asyncio anyio | grep -E "^(Name|Version):"
+          echo "=== pytest.ini contents ==="
+          cat pytest.ini
+          echo "=== conftest.py first 30 lines ==="
+          head -30 tests/conftest.py
+
+      - name: Test collection only
+        run: python -m pytest tests/ -m "not integration" --co -q 2>&1
+        continue-on-error: true
+
       - name: Run unit tests
-        run: pytest tests/ -v -m "not integration" --tb=short
+        run: python -m pytest tests/ -m "not integration" --tb=long -q
 
   frontend-build:
     runs-on: ubuntu-latest

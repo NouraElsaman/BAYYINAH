@@ -3,10 +3,6 @@ FROM python:3.12-slim-bookworm AS base
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    # Point HuggingFace model downloads to /data/hf_cache.
-    # On Render this path is on the persistent disk so models survive restarts.
-    # On Docker Compose, mount a named volume here for the same effect.
-    # If HF_HOME is overridden by the caller (e.g. local dev), that takes precedence.
     HF_HOME=/data/hf_cache
 
 WORKDIR /app
@@ -17,13 +13,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies.
-# --extra-index-url points to the PyTorch CPU-only wheel index so that
-# sentence-transformers / FlagEmbedding do not pull the 2.8 GB CUDA build.
-COPY requirements.txt .
+# Upgrade pip to the latest version for modern resolver behaviour.
+RUN pip install --upgrade pip
+
+# Pre-install the PyTorch CPU build explicitly before the main requirements.
+# Without this, pip resolves torch from PyPI (CUDA build, ~2.8 GB) when
+# sentence-transformers or FlagEmbedding list 'torch' as a dependency.
+# With torch-cpu already present, the subsequent -r requirements.txt install
+# sees it as satisfied and does not replace it.
 RUN pip install --no-cache-dir \
-    --extra-index-url https://download.pytorch.org/whl/cpu \
-    -r requirements.txt
+    --index-url https://download.pytorch.org/whl/cpu \
+    torch==2.13.0+cpu
+
+# Install the rest of the application dependencies.
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY app ./app
